@@ -1,0 +1,99 @@
+/*
+	Sistema de Gestión de anomalías para un juez calificador
+*/
+
+FUNCTION_BLOCK tipper	// Block definition (there may be more than one block per file)
+
+// Define input variables
+VAR_INPUT				
+	delito : REAL;
+	estado : REAL;
+	antecedentes : REAL;
+END_VAR
+
+// Define output variable
+VAR_OUTPUT				
+	proceso : REAL;
+END_VAR
+
+// Fuzzify input variable 'delito': {'grave', 'menosg' , 'leve', 'actividad'}
+FUZZIFY delito			
+	TERM grave := (75, 0) (85, 1) (95,1) (100,0);
+	TERM menosg := (50, 0) (55, 1) (60,1) (78,0);
+	TERM leve := (20, 0) (35, 1) (50,1) (60,0);
+	TERM actividad := (12, 0) (15, 1) (18,1) (25,0);
+END_FUZZIFY
+
+// Fuzzify input variable 'estado': {'mentales', 'ebriedad', 'drogado', 'normal' }
+FUZZIFY estado			
+	TERM mentales := (14, 0) (15, 1) (18,1) (25,0);
+	TERM ebriedad := (20, 0) (35, 1) (50,1) (60,0);
+	TERM drogado := (50, 0) (55, 1) (60,1) (78,0);
+	TERM normal := (75, 0) (85, 1) (95,1) (100,0);
+END_FUZZIFY
+
+// Fuzzify input variable 'antecedentes': { 'no', 'si' }
+FUZZIFY antecedentes			
+	TERM no := (50, 0) (100, 1);
+	TERM si := (0, 1) (55, 0);
+END_FUZZIFY
+
+
+// Defzzzify output variable 'proceso' : {'multa', 'internamiento', 'tratamiento', 'deroga', 'prision' }
+DEFUZZIFY proceso			
+	TERM multa := (50, 0) (55, 1) (60,1) (78,0);
+	TERM internamiento := (35, 0) (45, 1) (55,1) (65,0);
+	TERM tratamiento := (20, 0) (35, 1) (50,1) (60,0);
+    TERM deroga := (12, 0) (15, 1) (18,1) (25,0);
+	TERM prision := (75, 0) (85, 1) (95,1) (100,0);
+	METHOD : COG;		// Use 'Center Of Gravity' defuzzification method
+	DEFAULT := 0;		// Default value is 0 (if no rule activates defuzzifier)
+END_DEFUZZIFY
+
+// Inference rules
+RULEBLOCK No1
+	AND : MIN;	// Use 'min' for 'and'
+	ACT : MIN;	// Use 'min' activation method
+	ACCU : MAX;	// Use 'max' accumulation method
+
+	 
+	RULE 1 : IF delito IS grave AND estado IS mentales AND antecedentes IS no THEN proceso IS internamiento;
+	RULE 2 : IF delito IS grave AND estado IS ebriedad AND antecedentes IS no THEN proceso IS prision;
+	RULE 3 : IF delito IS grave AND estado IS drogado AND antecedentes IS no THEN proceso IS prision;
+	RULE 4 : IF delito IS grave AND estado IS normal AND antecedentes IS no THEN proceso IS multa;
+	RULE 5 : IF delito IS grave AND estado IS mentales AND antecedentes IS si THEN proceso IS internamiento;
+	RULE 6 : IF delito IS grave AND estado IS ebriedad AND antecedentes IS si THEN proceso IS prision;
+	RULE 7 : IF delito IS grave AND estado IS drogado AND antecedentes IS si THEN proceso IS prision;
+	RULE 8 : IF delito IS grave AND estado IS normal AND antecedentes IS si THEN proceso IS multa;
+
+	RULE 9 : IF delito IS menosg AND estado IS mentales AND antecedentes IS no THEN proceso IS internamiento;
+	RULE 10 : IF delito IS menosg AND estado IS ebriedad AND antecedentes IS no THEN proceso IS prision;
+	RULE 11 : IF delito IS menosg AND estado IS drogado AND antecedentes IS no THEN proceso IS prision;
+	RULE 12 : IF delito IS menosg AND estado IS normal AND antecedentes IS no THEN proceso IS multa;
+	RULE 13 : IF delito IS menosg AND estado IS mentales AND antecedentes IS si THEN proceso IS internamiento;
+	RULE 14 : IF delito IS menosg AND estado IS ebriedad AND antecedentes IS si THEN proceso IS prision;
+	RULE 15 : IF delito IS menosg AND estado IS drogado AND antecedentes IS si THEN proceso IS prision;
+	RULE 16 : IF delito IS menosg AND estado IS normal AND antecedentes IS si THEN proceso IS multa;
+
+	RULE 17 : IF delito IS leve AND estado IS mentales AND antecedentes IS no THEN proceso IS internamiento;
+	RULE 18 : IF delito IS leve AND estado IS ebriedad AND antecedentes IS no THEN proceso IS prision;
+	RULE 19 : IF delito IS leve AND estado IS drogado AND antecedentes IS no THEN proceso IS prision;
+	RULE 20 : IF delito IS leve AND estado IS normal AND antecedentes IS no THEN proceso IS multa;
+	RULE 21 : IF delito IS leve AND estado IS mentales AND antecedentes IS si THEN proceso IS internamiento;
+	RULE 22 : IF delito IS leve AND estado IS ebriedad AND antecedentes IS si THEN proceso IS prision;
+	RULE 23 : IF delito IS leve AND estado IS drogado AND antecedentes IS si THEN proceso IS prision;
+	RULE 24 : IF delito IS leve AND estado IS normal AND antecedentes IS si THEN proceso IS multa;
+
+
+	RULE 25 : IF delito IS actividad AND estado IS mentales AND antecedentes IS no THEN proceso IS internamiento;
+	RULE 26 : IF delito IS actividad AND estado IS ebriedad AND antecedentes IS no THEN proceso IS prision;
+	RULE 27 : IF delito IS actividad AND estado IS drogado AND antecedentes IS no THEN proceso IS prision;
+	RULE 28 : IF delito IS actividad AND estado IS normal AND antecedentes IS no THEN proceso IS multa;
+	RULE 29 : IF delito IS actividad AND estado IS mentales AND antecedentes IS si THEN proceso IS internamiento;
+	RULE 30 : IF delito IS actividad AND estado IS ebriedad AND antecedentes IS si THEN proceso IS prision;
+	RULE 31 : IF delito IS actividad AND estado IS drogado AND antecedentes IS si THEN proceso IS prision;
+	RULE 32 : IF delito IS actividad AND estado IS normal AND antecedentes IS si THEN proceso IS multa;
+
+END_RULEBLOCK
+
+END_FUNCTION_BLOCK
